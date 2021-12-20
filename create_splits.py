@@ -10,6 +10,7 @@ from utils import get_module_logger
 TRAIN_PERCENTAGE = 0.7
 VAL_PERCENTAGE = 0.15
 TEST_PERCENTAGE = 0.15
+SEED = 42
 
 
 def split(source, destination):
@@ -36,7 +37,9 @@ def split(source, destination):
         os.path.join(destination, "test"),
     ]
 
-    all_tfrecords = glob.glob(f"{source}/*.tfrecord")
+    all_tfrecords = glob.glob("{}/*.tfrecord".format(source))
+
+    np.random.seed(SEED)
     np.random.shuffle(all_tfrecords)
 
     dataset_size = len(all_tfrecords)
