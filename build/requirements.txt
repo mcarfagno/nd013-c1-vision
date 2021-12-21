@@ -1,3 +1,4 @@
+pyparsing==2.4.2
 Cython==0.29.21
 jupyter==1.0.0
 matplotlib==3.0.3
