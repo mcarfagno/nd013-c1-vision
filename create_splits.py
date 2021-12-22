@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import random
+import shutil
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def split(source, destination):
 
     dataset_dirs = [
         os.path.join(destination, "train"),
-        os.path.join(destination, "validation"),
+        os.path.join(destination, "val"),
         os.path.join(destination, "test"),
     ]
 
@@ -59,7 +60,8 @@ def split(source, destination):
             print(
                 "Creating symplink for file {} into {} ...".format(tfrecord, directory)
             )
-            os.symlink(tfrecord, os.path.join(directory, os.path.basename(tfrecord)))
+            #os.symlink(tfrecord, os.path.join(directory, os.path.basename(tfrecord)))
+            shutil.copy(tfrecord, os.path.join(directory, os.path.basename(tfrecord)))
 
 
 if __name__ == "__main__":
