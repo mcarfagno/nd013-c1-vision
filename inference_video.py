@@ -95,7 +95,7 @@ def main(labelmap_path, model_path, tf_record_path, config_path, output_path):
         im_obj.set_data(image)
 
     anim = animation.FuncAnimation(f, animate, frames=len(images))
-    anim.save(output_path, fps=5, dpi=300)
+    anim.save(output_path, fps=5, dpi=300, writer='imagemagick')
 
 
 if __name__ == "__main__":
