@@ -138,17 +138,88 @@ Finally, you can create a video of your model's inferences for any tf record fil
 python inference_video.py --labelmap_path label_map.pbtxt --model_path experiments/reference/exported/saved_model --tf_record_path /data/waymo/testing/segment-12200383401366682847_2552_140_2572_140_with_camera_labels.tfrecord --config_path experiments/reference/pipeline_new.config --output_path animation.gif
 ```
 
-## Submission Template
+## Submission
 
 ### Project overview
-This section should contain a brief description of the project and what we are trying to achieve. Why is object detection such an important component of self driving car systems?
+The aim of this project is to leverage Tensorflow object detection pipeline to perform object detection on camera data from [Waymo](waimo.com/open) Urban driving dataset. Object detection is a powerful technique used in autonomous systems such as driverless cars to understand the surronding environment in planning and decision-making.
 
 ### Set up
-This section should contain a brief description of the steps to follow to run the code for this repository.
+The experiments were performed on a machine with a nvidia GTX3080GPU using the Docker Container included in the `build` directory, see the included README.MD on how to build and run the container. Keep in mind that in this guide I will refer to the paths used within the docker container.
+
+#### Download and Split data from Waymo
+The data is not included in this repo and has to be downloaded separately in order to reproduce the experiments. Make sure you have a google account registered to Waymo Open Dataset and you are logged in using `gsutils`. 
+
+Downloads 100 `.tfrecords` used to perform the experiments:
+```
+python download_process.py --data_dir /app/project/data/
+```
+
+Split the data:
+```
+python create_splits.py --data_dir /app/project/data/
+```
+
+The resulting direcory structure in `/app/project/data` should now be:
+```
+data
+├── processed
+├── raw
+├── test
+├── train
+└── val
+```
+
+#### Download pretrained model
+SSD-Resnet50 model is used as a starting point for this project. The pretrained model files are not included in the repo and have to be downloaded form tensorflow [here](http://download.tensorflow.org/models/object_detection/tf2/20200711/ssd_resnet50_v1_fpn_640x640_coco17_tpu-8.tar.gz). Extract the archive and place the `ssd_resnet50_v1_fpn_640x640_coco17_tpu-8` directory in `/app/project/experiments/pretrained_model`.
+```
+experiments
+├── augmentations_0
+├── augmentations_1
+├── augmentations_2
+├── augmentations_3
+├── augmentations_4
+├── augmentations_5
+├── pretrained_model
+│  └── ssd_resnet50_v1_fpn_640x640_coco17_tpu-8
+│     ├── checkpoint
+│     └── saved_model
+│        ├── assets
+│        └── variables
+└── reference
+```
+
+#### Run an experiment
+Each experiment reported in this project can be replicated using the preconfigured `pipeline.config` file in the experimet's subdirectory.
+
+Model training:
+```
+python experiments/model_main_tf2.py --model_dir=/app/project/experiments/<EXPERIMENT_DIR>/ --pipeline_config_path=/app/project/experiments/<EXPERIMENT_DIR>/pipeline_new.config
+```
+
+Model evaluation:
+```
+python experiments/model_main_tf2.py --model_dir=/app/project/experiments/<EXPERIMET_DIR>/ --pipeline_config_path=/app/project/experiments/<EXPERIMENT_DIR>/pipeline_new.config --checkpoint_dir=/app/project/experiments/<EXPERIMENT_DIR>/
+```
+
+Tensorboard plots:
+```
+python -m tensorboard.main --logdir experiments/<EXPERIMENT_DIR>/
+```
 
 ### Dataset
 #### Dataset analysis
-This section should contain a quantitative and qualitative description of the dataset. It should include images, charts and other visualizations.
+Initial Dataset analysis was performed in the `Exploratory Data Analysis.ipynb` jupyer notebook. The dataset, which contains groundtruth bounding boxes for pedestrians, cyclists and cars, is somewhat challenging. The Driving scenarios are quite diverse: different places, weather conditions as well ifferent times of the day.
+
+![Dataset1](media/dataset.png "Samples from Waymo Open Dataset")
+
+Moreover, additional data analysis show that the dataset in not well balanced as well: the classes are not well distributed with the majority of of objects in the image being vehicles, with very few cyclists!
+
+![Dataset2](media/eda1.png "Classes distribution in Waymo Open Dataset")
+
+Object quantity in each image is also not homogeneous at all: with images from highway driving containing only up to 20 objects while crowded city scenaris can contain as well up to 70 objects. 
+
+![Dataset2](media/eda2.png "Objects in Waymo Open Dataset")
+
 #### Cross validation
 This section should detail the cross validation strategy and justify your approach.
 
