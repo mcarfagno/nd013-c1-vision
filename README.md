@@ -4,7 +4,7 @@
 The aim of this project is to leverage Tensorflow object detection pipeline to perform object detection on camera data from [Waymo](waimo.com/open) Urban driving dataset. Object detection is a powerful technique used in autonomous systems such as driverless cars to understand the surronding environment in planning and decision-making.
 
 ### Set up
-The experiments were performed on a machine with a nvidia GTX3080GPU using the Docker Container included in the `build` directory, see the included README.MD on how to build and run the container. Keep in mind that in this guide I will refer to the paths used within the docker container.
+The experiments were performed on a machine with a Nvidia GTX3080 GPU using the Docker Container included in the `build` directory, see the included README.MD on how to build and run the container. Keep in mind that in this guide I will refer to the paths used within the docker container.
 
 #### Download and Split data from Waymo
 The data is not included in this repo and has to be downloaded separately in order to reproduce the experiments. Make sure you have a google account registered to Waymo Open Dataset and you are logged in using `gsutils`. 
@@ -81,9 +81,9 @@ Object quantity in each image is also not homogeneous at all: with images from h
 ![Dataset2](media/eda2.png "Objects in Waymo Open Dataset")
 
 #### Cross validation
-Given the challenging problem and given there are not many raw training images (only 100 tfrecords), I decided to create a cross-validation plit of 70/15/15 for training, validation and final test dataset. 
+Given the challenging problem and given there are not many raw training images (only 100 tfrecords), the decisioon was to create a cross-validation split of 70/15/15 for training, validation and final test dataset.
 
-In my wiew this would help in having enough variety in validation and testing datasets: in fact with smaller splits there may have been the possibility of having either test or validation splits with no pedestrians! Moreover, data augmentation will be leveraged to provide additional variety in training data.
+In my wiew, this would help in having enough variety in validation and testing datasets: in fact with smaller splits there may have been the possibility of having either test or validation splits with no pedestrians! Moreover, data augmentation will be leveraged to provide additional variety in training data.
 
 ### Training
 #### Reference experiment
@@ -112,15 +112,17 @@ Here is a discussion of the results: from the training graph hitting a plateau a
 
 #### Improve on the reference
 
-To improve on the model performance, the first intuition was to leverage data augmetation to make the model more resiliant to **obstructions** of the objects. I explored this in the `Explore augmentations.ipynb` notebook by applying random black pathes and later on gaussian patches on the input image. We will later show gaussian patches to provide better results, in hindsight this makes sense as they do not fully hide the underlaying features.
+To improve on the model performance, the results from the reference were used to gain some insigth:
+
+* The first intuition was to leverage data augmetation to make the model more resiliant to **obstructions** of the objects, in fact that could be why the reference experiment performed so poorlywith very low recall. Solutions were explored in the `Explore augmentations.ipynb` notebook by applying random black pathes and later on gaussian patches on the input image. We will later show gaussian patches to provide better results, in hindsight this makes sense as they do not fully hide the underlaying features.
 
  Black Patches             |  Gaussian Patches
 :-------------------------:|:-------------------------:
 ![](media/aug1.png)        |  ![](media/aug2.png)
 
-The second intuition was to try leveraging another optimizer, in particula I opted with **Adam** optimizer wich improves the one used in the reference experiment by using an adaptive momentum, as well by using a much lower **learning rate** while increasing the **batch size** to avoid overfitting.
+* The second intuition was to try leveraging another optimizer, in particular the choice was the **Adam** optimizer (wich improves over the one used in the reference experiment by using an adaptive momentum), as well by using a much lower **learning rate** while increasing the **batch size** to avoid overfitting.
 
-I also experimented with random crops plus gamma adjusmets but I found the results quite lacking during validation.
+Also, experiments with random crops plus gamma adjusmets were carried out but the results were quite lacking during validation.
 
 Therefore, the following experiments were carried out as modifications of the reference pipeline configuration:
 
